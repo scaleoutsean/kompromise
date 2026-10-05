@@ -130,11 +130,15 @@ Enable bucket versioning for buckets with notifications and optionaly add ILM to
 
 Find retrieve the referenced version when processing must match a specific event. 
 
-Space out object overwrites (e.g. 10s) to decrease the likelihood of out-of-order notifications from StorageGRID.
+If you overwrite objects, space out object overwrites (e.g. 10s) to decrease the likelihood of out-of-order notifications from StorageGRID. 
+
+Limit access to Webhook (or its gateway) IP/FQDN to StorageGRID storage nodes (all storage nodes, because notifications can come from any site) unless you come up with additional security controls on your own.
+
+Simple+ doesn't capture rich object metadata like full Kompromise does, so tags and metadata may not be captured. A workaround - if you need that detail - is to fetch them as you process notifications exit from Kafka (full Kompromise does something similar in Rich notifications). A downside is your client may crash or time out after receiving Kafka notification, leaving you with nothing (no index entry, no tags either, and Kafka has delivered the notification once).
 
 ## Webhook notification 
 
-Unless you configure your own mTLS or TLS (by adding an API gateway or reverse proxy in front of Kompromise Lite), set TLS validation to `None`.
+Unless you configure your own mTLS or TLS (by adding an API gateway or reverse proxy in front of Kompromise Lite), set TLS validation to `Disabled` *unless* you have set up a proxy or gateway in front of Webhook to make TLS or mTLS work.
 
 ![StorageGRID 12.1 Webhook Notification](images/kompromise-lite-00-storagegrid-webhook-configuration.png)
 
