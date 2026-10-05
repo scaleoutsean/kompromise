@@ -8,12 +8,11 @@ The features of Kompromise Lite edition are similar to Simple notifications from
 
 - StorageGRID notifications -> credential-free Simple+ webhook -> Vector.
 - Two containers, three configuration files, no Kubernetes or S3 keys required.
-- Curated examples for forwarding to Elasticsearch (or OpenSearch) as the mainstream search solution and Kafka (provided here because full Kompromise stack defaults to NATS)
-
+- Console output for inspection and an optional Kafka sink (provided here because full Kompromise stack defaults to NATS). Downstream consumers process notifications into their destination's document format.
 
 ## Simple+ JSON
 
-This is the outgoing event: Elasticsearch documents and Kafka values have the same format as Simple+ NATS messages in the main stack. Vector removes the webhook's stdout wrapper before forwarding.
+This is the outgoing event: console output and Kafka values have the same format as Simple+ NATS messages in the main stack. Vector removes the webhook's stdout wrapper before forwarding.
 
 ```json
 {
@@ -99,7 +98,7 @@ The envelope schema leaves record contents open to preserve backend-specific fie
 Requires Docker Compose v2 on Linux. From the repository root:
 
 1. Edit [deploy/lite/webhook.yaml](deploy/lite/webhook.yaml): set `tenant` and `bucket`.
-2. Optionally uncomment Elasticsearch or Kafka in [deploy/lite/vector.yaml](deploy/lite/vector.yaml) and configure the destination. Console output is enabled by default.
+2. Optionally uncomment Kafka in [deploy/lite/vector.yaml](deploy/lite/vector.yaml) and configure the destination and authentication. Console output is enabled by default.
 3. Build own Webhook image from a file in Releases (x86 or ARM64) or use mine from Docker Hub (replace Webhook image in `docker-compose-lite.yaml` with `scaleoutsean/kompromise-webhook:lite-0.1.0-faba361`).
 4. Build and start with [docker-compose-lite.yaml](docker-compose-lite.yaml):
 
@@ -123,7 +122,7 @@ Lite forwards notifications only. Each enabled Vector sink has a persistent ~256
 
 `docker compose -f docker-compose-lite.yaml down` keeps on-disk buffers. Use `down -v` to delete them.
 
-Kompromise Lite has no rich S3 enrichment, audit-log bridge, any gap coverage, S3 caching, object-state index maintenance. Elasticsearch is an event-journal example, not an object inventory.
+Kompromise Lite has no rich S3 enrichment, audit-log bridge, any gap coverage, S3 caching, or object-state index maintenance. Indexing belongs in a separate downstream consumer, not in this stack.
 
 ## Tips
 
@@ -144,7 +143,7 @@ Suggested conventions:
 - URI: HTTP or HTTPS host and port of your choosing with `/events/sg/<tenant>/<bucket>`
 - URN: `urn:<storagegrid_site>:webhook:<tenant_id>::<bucket_name>`
 
-StorageGRID does not allow major edits to Webhook configuration, so while you may need to delete a HTTP notification to recreate it with HTTPS and TLS or mTLS validation, for an example, it is useful to have one naming convention for all Webhook configurations.
+StorageGRID does not allow major edits to Webhook configuration, so while you may need to delete an HTTP notification to recreate it with HTTPS and TLS or mTLS validation, for an example, it is useful to have one naming convention for all Webhook configurations.
 
 ## Additional information
 

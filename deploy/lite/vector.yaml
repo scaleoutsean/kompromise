@@ -35,38 +35,8 @@ sinks:
       # Intentionally lose new events when this sink's buffer is full.
       when_full: drop_newest
 
-  # Optional Elasticsearch/OpenSearch event journal: uncomment to enable.
-  # Documents are complete NATS-compatible envelopes, not per-object state.
-  # Production destinations normally require authentication and TLS.
-  # Prefer a least-privilege, expiring Elasticsearch API key, not an admin password.
-  # Set ELASTICSEARCH_API_KEY to the key's encoded value (base64 of id:api_key),
-  # without the "ApiKey " prefix. Keep it outside version control and rotate it.
-  # Compose passes credentials to Vector and opts into environment interpolation.
-  # Native Elasticsearch uses Authorization: ApiKey, NOT x-api-key.
-  # OpenSearch authentication differs by deployment; adapt this example accordingly.
-  # elasticsearch:
-  #   type: elasticsearch
-  #   inputs: [nats_envelope]
-  #   endpoints: ["${ELASTICSEARCH_ENDPOINT:-https://host.docker.internal:9200}"]
-  #   request:
-  #     headers:
-  #       Authorization: "ApiKey ${ELASTICSEARCH_API_KEY}"
-  #   tls:
-  #     verify_certificate: true
-  #     verify_hostname: true
-  #     # For a private CA, mount its PEM into Vector and set ca_file here.
-  #     # ca_file: /etc/vector/certs/elasticsearch-ca.pem
-  #   mode: bulk
-  #   api_version: v8 # Use v7 for OpenSearch / Elasticsearch 7.
-  #   bulk:
-  #     index: "${ELASTICSEARCH_INDEX:-s3-events}"
-  #     action: index
-  #   buffer:
-  #     type: disk
-  #     max_size: 268435488 # 256 MiB + 32 bytes, per sink.
-  #     when_full: drop_newest # Intentionally drop new events at capacity.
-
   # Optional Kafka: uncomment to enable. All advertised brokers must be reachable.
+  # Downstream consumers process notifications into their destination's document format.
   # Production Kafka (including Kafka 4) normally requires authentication and TLS.
   # SCRAM-SHA-512 over TLS is one common option; match the broker's configuration.
   # Use a dedicated producer identity with topic-scoped ACLs, not an admin account.

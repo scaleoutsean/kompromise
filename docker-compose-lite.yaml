@@ -40,11 +40,8 @@ services:
       # Vector 0.58 requires explicit opt-in for ${VAR} config substitutions.
       VECTOR_DANGEROUSLY_ALLOW_ENV_VAR_INTERPOLATION: "true"
       KOMPROMISE_COMPOSE_PROJECT: "${COMPOSE_PROJECT_NAME:-kompromise-lite}"
-      ELASTICSEARCH_ENDPOINT: "${ELASTICSEARCH_ENDPOINT:-https://host.docker.internal:9200}"
-      ELASTICSEARCH_INDEX: "${ELASTICSEARCH_INDEX:-s3-events}"
       # Supply destination credentials via environment or an untracked .env file.
       # Empty defaults keep the console-only deployment credential-free.
-      ELASTICSEARCH_API_KEY: "${ELASTICSEARCH_API_KEY:-}"
       KAFKA_BOOTSTRAP_SERVERS: "${KAFKA_BOOTSTRAP_SERVERS:-host.docker.internal:9092}"
       KAFKA_TOPIC: "${KAFKA_TOPIC:-s3-events}"
       KAFKA_SASL_USERNAME: "${KAFKA_SASL_USERNAME:-}"
