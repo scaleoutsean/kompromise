@@ -1,0 +1,14 @@
+# Simple+ adds receipt/completion timestamps without S3 reads or credentials.
+source: sgws
+listen: ":8080"
+output: console
+mtls:
+  enabled: false
+
+pipelines:
+  # Replace demo/images with your routing label and actual bucket name.
+  # StorageGRID endpoint: http://<host>:8080/events/sg/demo/images
+  - name: simple
+    tenant: demo
+    bucket: images
+    mode: simple

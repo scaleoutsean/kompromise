@@ -1,0 +1,63 @@
+name: kompromise-lite
+
+services:
+  webhook:
+    image: kompromise-webhook:lite
+    build:
+      context: ./webhook
+    restart: unless-stopped
+    environment:
+      GIN_MODE: release
+    ports:
+      - "${WEBHOOK_BIND_IP:-127.0.0.1}:${WEBHOOK_PORT:-8080}:8080"
+    volumes:
+      - ./deploy/lite/webhook.yaml:/etc/kompromise/config.yaml:ro
+    labels:
+      kompromise.lite.events: "${COMPOSE_PROJECT_NAME:-kompromise-lite}"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  vector:
+    image: ghcr.io/vectordotdev/vector:0.58.0-alpine
+    restart: unless-stopped
+    command: ["--config", "/etc/vector/vector.yaml"]
+    depends_on:
+      webhook:
+        condition: service_healthy
+    environment:
+      # Vector 0.58 requires explicit opt-in for ${VAR} config substitutions.
+      VECTOR_DANGEROUSLY_ALLOW_ENV_VAR_INTERPOLATION: "true"
+      KOMPROMISE_COMPOSE_PROJECT: "${COMPOSE_PROJECT_NAME:-kompromise-lite}"
+      ELASTICSEARCH_ENDPOINT: "${ELASTICSEARCH_ENDPOINT:-https://host.docker.internal:9200}"
+      ELASTICSEARCH_INDEX: "${ELASTICSEARCH_INDEX:-s3-events}"
+      # Supply destination credentials via environment or an untracked .env file.
+      # Empty defaults keep the console-only deployment credential-free.
+      ELASTICSEARCH_API_KEY: "${ELASTICSEARCH_API_KEY:-}"
+      KAFKA_BOOTSTRAP_SERVERS: "${KAFKA_BOOTSTRAP_SERVERS:-host.docker.internal:9092}"
+      KAFKA_TOPIC: "${KAFKA_TOPIC:-s3-events}"
+      KAFKA_SASL_USERNAME: "${KAFKA_SASL_USERNAME:-}"
+      KAFKA_SASL_PASSWORD: "${KAFKA_SASL_PASSWORD:-}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./deploy/lite/vector.yaml:/etc/vector/vector.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - vector-data:/var/lib/vector
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    stop_grace_period: 30s
+
+volumes:
+  vector-data:
