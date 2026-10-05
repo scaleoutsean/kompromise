@@ -2,9 +2,12 @@ name: kompromise-lite
 
 services:
   webhook:
-    image: kompromise-webhook:lite
-    build:
-      context: ./webhook
+    # Use binaries from release to build own docker image with your own version if needed
+    # Below defaults to using the pre-built image from https://hub.docker.com/repository/docker/scaleoutsean/kompromise-webhook
+    image: scaleoutsean/kompromise-webhook:lite-0.1.0-faba361
+    # image: kompromise-webhook:lite
+    # build:
+    #   context: ./webhook
     restart: unless-stopped
     environment:
       GIN_MODE: release
