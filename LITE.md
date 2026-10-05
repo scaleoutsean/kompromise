@@ -100,7 +100,8 @@ Requires Docker Compose v2 on Linux. From the repository root:
 
 1. Edit [deploy/lite/webhook.yaml](deploy/lite/webhook.yaml): set `tenant` and `bucket`.
 2. Optionally uncomment Elasticsearch or Kafka in [deploy/lite/vector.yaml](deploy/lite/vector.yaml) and configure the destination. Console output is enabled by default.
-3. Build and start with [docker-compose-lite.yaml](docker-compose-lite.yaml):
+3. Build own Webhook image from a file in Releases (x86 or ARM64) or use mine from Docker Hub (replace Webhook image in `docker-compose-lite.yaml` with `scaleoutsean/kompromise-webhook:lite-0.1.0-faba361`.
+4. Build and start with [docker-compose-lite.yaml](docker-compose-lite.yaml):
 
 ```sh
 docker compose -f docker-compose-lite.yaml up -d --build
@@ -122,8 +123,7 @@ Lite forwards notifications only. Each enabled Vector sink has a persistent ~256
 
 `docker compose -f docker-compose-lite.yaml down` keeps on-disk buffers. Use `down -v` to delete them.
 
-Kompromise Lite has no rich S3 enrichment, audit-log bridge, any gap coverage, S3 caching, object-state index maintenance. Elasticsearch is an event-journal example, not an
-object inventory.
+Kompromise Lite has no rich S3 enrichment, audit-log bridge, any gap coverage, S3 caching, object-state index maintenance. Elasticsearch is an event-journal example, not an object inventory.
 
 ## Tips
 
